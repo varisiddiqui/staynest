@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DateRangeFields } from "@/components/date-range-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +13,11 @@ const selectClass =
 export function ListingsFilters({
   cities,
   values,
+  minDate,
 }: {
   cities: string[];
   values: ListingFilters;
+  minDate: string; // yyyy-mm-dd: earliest date a guest can pick
 }) {
   return (
     <form
@@ -49,25 +52,11 @@ export function ListingsFilters({
         </select>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="checkIn">Check-in</Label>
-        <Input
-          id="checkIn"
-          name="checkIn"
-          type="date"
-          defaultValue={values.checkIn ?? ""}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="checkOut">Check-out</Label>
-        <Input
-          id="checkOut"
-          name="checkOut"
-          type="date"
-          defaultValue={values.checkOut ?? ""}
-        />
-      </div>
+      <DateRangeFields
+        minDate={minDate}
+        defaultCheckIn={values.checkIn ?? ""}
+        defaultCheckOut={values.checkOut ?? ""}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="guests">Guests</Label>

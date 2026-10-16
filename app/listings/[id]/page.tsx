@@ -58,6 +58,9 @@ async function BookingPanel({
   // Same day the database uses for its "no past dates" rule (UTC).
   const minDate = new Date().toISOString().slice(0, 10);
 
+  // Ignore pre-filled dates from the URL if they are already in the past.
+  const datesOk = Boolean(checkIn && checkOut && checkIn >= minDate);
+
   return (
     <BookingForm
       listingId={listing.id}
@@ -65,8 +68,8 @@ async function BookingPanel({
       maxGuests={listing.max_guests}
       minDate={minDate}
       booked={booked}
-      defaultCheckIn={checkIn}
-      defaultCheckOut={checkOut}
+      defaultCheckIn={datesOk ? checkIn : undefined}
+      defaultCheckOut={datesOk ? checkOut : undefined}
       defaultGuests={guests}
     />
   );

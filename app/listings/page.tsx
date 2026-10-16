@@ -17,7 +17,10 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 async function Filters({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseFilters(await searchParams);
   const cities = await getCities();
-  return <ListingsFilters cities={cities} values={filters} />;
+  // Read after the database call, so it only runs at request time.
+  // Same day the database uses for its "no past dates" rule (UTC).
+  const today = new Date().toISOString().slice(0, 10);
+  return <ListingsFilters cities={cities} values={filters} minDate={today} />;
 }
 
 async function Results({ searchParams }: { searchParams: SearchParams }) {
