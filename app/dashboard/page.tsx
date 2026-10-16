@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -28,7 +29,13 @@ export default function DashboardPage() {
       <Suspense fallback={<Skeleton className="h-5 w-64" />}>
         <UserInfo />
       </Suspense>
-      <div>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/listings"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
+          Browse stays
+        </Link>
         <SignOutButton />
       </div>
     </main>
