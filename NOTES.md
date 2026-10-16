@@ -8,9 +8,13 @@ Working:
 - Booking via the `create_booking` database function (server-side price, no double-booking)
 - Dashboard "My trips" with cancel via `cancel_booking`
 
+- Shared navbar (`components/navbar.tsx`) in the root layout
+- Host side: any user can "Become a host" (`/host`), add / edit / delete their own
+  listings, and see bookings + revenue on them. Needs `supabase/host-migration.sql`.
+
 Not done yet:
-- Navbar shared across pages
-- Listing images (cards use a gradient placeholder when `image_url` is empty)
+- Listing image upload (hosts paste an image URL; cards use a gradient placeholder when empty)
+- Reviews, mock payment, admin analytics
 - Problem-statement specific features (add below once Round 2 PS is released)
 
 ## Architecture in one minute
@@ -24,7 +28,8 @@ Not done yet:
 
 ## Setup
 1. `cp .env.example .env.local` and fill in the Supabase URL + anon key.
-2. Run `supabase/schema.sql` in Supabase -> SQL Editor (safe to re-run).
+2. Run `supabase/schema.sql`, then `supabase/host-migration.sql`, in Supabase -> SQL Editor
+   (both safe to re-run).
 3. `npm install` then `npm run dev`.
 
 ## Next ideas

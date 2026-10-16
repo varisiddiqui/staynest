@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Add every page that needs a logged-in user here (we will add more later).
-const PROTECTED_PREFIXES = ["/dashboard"];
+const PROTECTED_PREFIXES = ["/dashboard", "/host"];
 const AUTH_PAGES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {

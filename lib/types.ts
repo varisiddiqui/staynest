@@ -10,6 +10,11 @@ export type Listing = {
   image_url: string | null;
 };
 
+export type Role = "guest" | "host";
+
+// A listing as seen by the host who owns it.
+export type HostListing = Listing & { host_id: string | null };
+
 export type BookingStatus = "confirmed" | "cancelled";
 
 // A booking row plus the joined listing info shown on the dashboard.
