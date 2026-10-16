@@ -10,6 +10,9 @@ export type Listing = {
   image_url: string | null;
 };
 
+// A stretch of dates already taken on a listing (no user info).
+export type BookedRange = { check_in: string; check_out: string };
+
 export type Role = "guest" | "host";
 
 // A listing as seen by the host who owns it.

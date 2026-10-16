@@ -10,10 +10,17 @@ import {
 import { formatINR } from "@/lib/format";
 import type { Listing } from "@/lib/types";
 
-export function ListingCard({ listing }: { listing: Listing }) {
+export function ListingCard({
+  listing,
+  query,
+}: {
+  listing: Listing;
+  // Optional query string (dates, guests) carried over to the detail page.
+  query?: string;
+}) {
   return (
     <Link
-      href={`/listings/${listing.id}`}
+      href={`/listings/${listing.id}${query ? `?${query}` : ""}`}
       className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">

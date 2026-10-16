@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createBooking, type BookingState } from "@/app/listings/[id]/actions";
 import { formatINR } from "@/lib/format";
+import type { BookedRange } from "@/lib/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -14,18 +15,26 @@ export function BookingForm({
   pricePerNight,
   maxGuests,
   minDate,
+  booked,
+  defaultCheckIn = "",
+  defaultCheckOut = "",
+  defaultGuests = 1,
 }: {
   listingId: string;
   pricePerNight: number;
   maxGuests: number;
   minDate: string; // yyyy-mm-dd, computed on the server
+  booked: BookedRange[];
+  defaultCheckIn?: string;
+  defaultCheckOut?: string;
+  defaultGuests?: number;
 }) {
   const [state, formAction, pending] = useActionState<BookingState, FormData>(
     createBooking.bind(null, listingId),
     {}
   );
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState(defaultCheckIn);
+  const [checkOut, setCheckOut] = useState(defaultCheckOut);
 
   // Display-only estimate. The database recalculates the real price.
   const nights =
@@ -33,6 +42,16 @@ export function BookingForm({
       ? Math.round((Date.parse(checkOut) - Date.parse(checkIn)) / DAY_MS)
       : 0;
   const total = nights > 0 ? nights * pricePerNight : 0;
+
+  // Ranges are [check_in, check_out): checking in on someone's check-out day is fine.
+  // yyyy-mm-dd strings compare correctly as plain text.
+  const clashes =
+    checkIn !== "" &&
+    checkOut !== "" &&
+    checkOut > checkIn &&
+    booked.some((r) => checkIn < r.check_out && checkOut > r.check_in);
+
+  const startGuests = Math.min(Math.max(defaultGuests, 1), maxGuests);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -72,11 +91,17 @@ export function BookingForm({
           required
           min={1}
           max={maxGuests}
-          defaultValue={1}
+          defaultValue={startGuests}
         />
       </div>
 
-      {total > 0 && (
+      {clashes && (
+        <p role="alert" className="text-sm text-red-600">
+          These dates overlap an existing booking. Please pick other dates.
+        </p>
+      )}
+
+      {total > 0 && !clashes && (
         <p className="text-sm">
           {nights} {nights === 1 ? "night" : "nights"} ×{" "}
           {formatINR(pricePerNight)} ={" "}
@@ -90,7 +115,7 @@ export function BookingForm({
         </p>
       )}
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" disabled={pending || clashes}>
         {pending ? "Booking..." : "Book now"}
       </Button>
     </form>

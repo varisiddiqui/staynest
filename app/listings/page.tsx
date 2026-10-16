@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ListingCard } from "@/components/listing-card";
 import { ListingsFilters } from "@/components/listings-filters";
 import { FiltersSkeleton, GridSkeleton } from "@/components/listings-skeleton";
+import { formatDate } from "@/lib/format";
 import { getCities, parseFilters, searchListings } from "@/lib/listings";
 
 export const metadata: Metadata = { title: "Stays" };
@@ -46,14 +47,26 @@ async function Results({ searchParams }: { searchParams: SearchParams }) {
     );
   }
 
+  // Carry the chosen dates and guests over to each stay's detail page.
+  const carry = new URLSearchParams();
+  if (filters.checkIn && filters.checkOut) {
+    carry.set("checkIn", filters.checkIn);
+    carry.set("checkOut", filters.checkOut);
+  }
+  if (filters.guests) carry.set("guests", String(filters.guests));
+  const query = carry.toString();
+
   return (
     <>
       <p className="text-sm text-muted-foreground">
         {data.length} {data.length === 1 ? "stay" : "stays"} found
+        {filters.checkIn &&
+          filters.checkOut &&
+          ` and available ${formatDate(filters.checkIn)} → ${formatDate(filters.checkOut)}`}
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
+          <ListingCard key={listing.id} listing={listing} query={query} />
         ))}
       </div>
     </>

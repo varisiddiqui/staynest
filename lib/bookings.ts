@@ -1,5 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
-import type { BookingWithListing } from "@/lib/types";
+import type { BookedRange, BookingWithListing } from "@/lib/types";
+
+// Upcoming dates already taken on a listing. Public info: dates only, no names.
+// Returns [] if the availability migration has not been run yet.
+export async function getBookedRanges(
+  listingId: string
+): Promise<BookedRange[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_booked_ranges", {
+    p_listing_id: listingId,
+  });
+  if (error) return [];
+  return (data ?? []) as BookedRange[];
+}
 
 // Returns the logged-in user's bookings (newest stay first).
 // Row-level security already limits rows to the current user.

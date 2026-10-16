@@ -8,6 +8,8 @@ export type ListingFilters = {
   city?: string;
   maxPrice?: number;
   guests?: number;
+  checkIn?: string; // yyyy-mm-dd, only set together with checkOut
+  checkOut?: string;
   sort: SortKey;
 };
 
@@ -19,6 +21,32 @@ const first = (v: string | string[] | undefined) =>
 function toPositiveInt(v: string | string[] | undefined) {
   const n = Number.parseInt(first(v) ?? "", 10);
   return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+// "2026-10-20" -> "2026-10-20"; anything that isn't a real calendar date -> undefined.
+export function parseDateParam(
+  v: string | string[] | undefined
+): string | undefined {
+  const s = first(v)?.trim();
+  if (!s || !DATE_RE.test(s)) return undefined;
+  const d = new Date(`${s}T00:00:00Z`);
+  if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== s) {
+    return undefined;
+  }
+  return s;
+}
+
+// Both dates must be valid and check-out must be after check-in.
+export function parseDateRange(raw: RawParams): {
+  checkIn?: string;
+  checkOut?: string;
+} {
+  const checkIn = parseDateParam(raw.checkIn);
+  const checkOut = parseDateParam(raw.checkOut);
+  if (!checkIn || !checkOut || checkOut <= checkIn) return {};
+  return { checkIn, checkOut };
 }
 
 // Turns the URL query string into safe, typed filters.
@@ -39,6 +67,7 @@ export function parseFilters(raw: RawParams): ListingFilters {
     city: city || undefined,
     maxPrice: toPositiveInt(raw.maxPrice),
     guests: toPositiveInt(raw.guests),
+    ...parseDateRange(raw),
     sort,
   };
 }
@@ -57,6 +86,19 @@ export async function searchListings(
   if (f.city) query = query.eq("city", f.city);
   if (f.maxPrice) query = query.lte("price_per_night", f.maxPrice);
   if (f.guests) query = query.gte("max_guests", f.guests);
+
+  // Date search: hide stays that already have a confirmed booking in the range.
+  if (f.checkIn && f.checkOut) {
+    const { data: busy, error: busyError } = await supabase.rpc(
+      "unavailable_listing_ids",
+      { p_check_in: f.checkIn, p_check_out: f.checkOut }
+    );
+    if (busyError) return { data: [], error: busyError.message };
+    const busyIds = (busy ?? []) as string[];
+    if (busyIds.length > 0) {
+      query = query.not("id", "in", `(${busyIds.join(",")})`);
+    }
+  }
 
   if (f.sort === "price_asc") {
     query = query.order("price_per_night", { ascending: true });

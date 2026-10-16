@@ -50,14 +50,22 @@ export function ListingsFilters({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="maxPrice">Max price / night</Label>
+        <Label htmlFor="checkIn">Check-in</Label>
         <Input
-          id="maxPrice"
-          name="maxPrice"
-          type="number"
-          min={1}
-          placeholder="e.g. 4000"
-          defaultValue={values.maxPrice ?? ""}
+          id="checkIn"
+          name="checkIn"
+          type="date"
+          defaultValue={values.checkIn ?? ""}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="checkOut">Check-out</Label>
+        <Input
+          id="checkOut"
+          name="checkOut"
+          type="date"
+          defaultValue={values.checkOut ?? ""}
         />
       </div>
 
@@ -70,6 +78,18 @@ export function ListingsFilters({
           min={1}
           placeholder="2"
           defaultValue={values.guests ?? ""}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="maxPrice">Max price / night</Label>
+        <Input
+          id="maxPrice"
+          name="maxPrice"
+          type="number"
+          min={1}
+          placeholder="e.g. 4000"
+          defaultValue={values.maxPrice ?? ""}
         />
       </div>
 
@@ -87,7 +107,7 @@ export function ListingsFilters({
         </select>
       </div>
 
-      <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-6">
+      <div className="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-4 lg:self-end">
         <Button type="submit">Search</Button>
         <Link
           href="/listings"
@@ -95,6 +115,9 @@ export function ListingsFilters({
         >
           Reset
         </Link>
+        <span className="text-xs text-muted-foreground">
+          Pick both dates to see only stays that are free.
+        </span>
       </div>
     </form>
   );

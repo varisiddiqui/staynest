@@ -12,6 +12,15 @@ Working:
 - Host side: any user can "Become a host" (`/host`), add / edit / delete their own
   listings, and see bookings + revenue on them. Needs `supabase/host-migration.sql`.
 
+- Availability: date search on /listings (hides stays booked in the range), booked dates
+  shown on the detail page, overlap warning in the booking form, dates carried from search
+  to the detail page. Needs `supabase/availability-migration.sql`.
+
+## Design decisions
+- Price is per listing per night (up to max guests), not per person.
+- Changing a listing's price or max guests affects new bookings only.
+  Existing bookings keep their stored total and guest count.
+
 Not done yet:
 - Listing image upload (hosts paste an image URL; cards use a gradient placeholder when empty)
 - Reviews, mock payment, admin analytics
@@ -28,8 +37,8 @@ Not done yet:
 
 ## Setup
 1. `cp .env.example .env.local` and fill in the Supabase URL + anon key.
-2. Run `supabase/schema.sql`, then `supabase/host-migration.sql`, in Supabase -> SQL Editor
-   (both safe to re-run).
+2. Run `supabase/schema.sql`, then `supabase/host-migration.sql` and
+   `supabase/availability-migration.sql`, in Supabase -> SQL Editor (all safe to re-run).
 3. `npm install` then `npm run dev`.
 
 ## Next ideas

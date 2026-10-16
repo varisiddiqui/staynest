@@ -10,17 +10,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getListing } from "@/lib/listings";
-import { formatINR } from "@/lib/format";
+import { getBookedRanges } from "@/lib/bookings";
+import { formatDate, formatINR } from "@/lib/format";
+import { getListing, parseDateRange } from "@/lib/listings";
 import { createClient } from "@/lib/supabase/server";
-import type { Listing } from "@/lib/types";
-import { connection } from "next/server";
+import type { BookedRange, Listing } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Stay details" };
 
+type Params = Promise<{ id: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
 // Reads the session cookie (runtime data), so it sits inside <Suspense>.
-async function BookingPanel({ listing }: { listing: Listing }) {
-  await connection();
+async function BookingPanel({
+  listing,
+  booked,
+  checkIn,
+  checkOut,
+  guests,
+}: {
+  listing: Listing;
+  booked: BookedRange[];
+  checkIn?: string;
+  checkOut?: string;
+  guests?: number;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -50,14 +64,36 @@ async function BookingPanel({ listing }: { listing: Listing }) {
       pricePerNight={listing.price_per_night}
       maxGuests={listing.max_guests}
       minDate={minDate}
+      booked={booked}
+      defaultCheckIn={checkIn}
+      defaultCheckOut={checkOut}
+      defaultGuests={guests}
     />
   );
 }
 
-async function Detail({ params }: { params: Promise<{ id: string }> }) {
+async function Detail({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
+
   const listing = await getListing(id);
   if (!listing) notFound();
+
+  const booked = await getBookedRanges(listing.id);
+
+  // Dates and guests carried over from the search page (validated).
+  const { checkIn, checkOut } = parseDateRange(sp);
+  const guestsRaw = Number.parseInt(
+    String(Array.isArray(sp.guests) ? sp.guests[0] : (sp.guests ?? "")),
+    10
+  );
+  const guests = Number.isFinite(guestsRaw) && guestsRaw > 0 ? guestsRaw : undefined;
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -86,6 +122,28 @@ async function Detail({ params }: { params: Promise<{ id: string }> }) {
           </p>
           {listing.description && <p>{listing.description}</p>}
         </div>
+
+        <section className="space-y-2 rounded-lg border p-4">
+          <h2 className="font-medium">Availability</h2>
+          {booked.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No upcoming bookings. All dates are open.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Already booked (you can check in on a check-out day):
+              </p>
+              <ul className="space-y-1 text-sm">
+                {booked.map((r) => (
+                  <li key={`${r.check_in}_${r.check_out}`}>
+                    {formatDate(r.check_in)} → {formatDate(r.check_out)}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
       </div>
 
       <Card className="h-fit">
@@ -99,7 +157,13 @@ async function Detail({ params }: { params: Promise<{ id: string }> }) {
         </CardHeader>
         <CardContent>
           <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-            <BookingPanel listing={listing} />
+            <BookingPanel
+              listing={listing}
+              booked={booked}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              guests={guests}
+            />
           </Suspense>
         </CardContent>
       </Card>
@@ -122,11 +186,13 @@ function DetailSkeleton() {
 
 export default function ListingDetailPage({
   params,
+  searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params: Params;
+  searchParams: SearchParams;
 }) {
   return (
-    <main className="mx-auto max-w-5xl space-y-6 p-6">
+    <main className="mx-auto w-full max-w-5xl space-y-6 p-6">
       <Link
         href="/listings"
         className="text-sm text-muted-foreground underline underline-offset-4"
@@ -134,7 +200,7 @@ export default function ListingDetailPage({
         ← Back to stays
       </Link>
       <Suspense fallback={<DetailSkeleton />}>
-        <Detail params={params} />
+        <Detail params={params} searchParams={searchParams} />
       </Suspense>
     </main>
   );
