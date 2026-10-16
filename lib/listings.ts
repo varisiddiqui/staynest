@@ -72,6 +72,21 @@ export async function searchListings(
   return { data: (data ?? []) as Listing[], error: null };
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// One listing by id, or null if it doesn't exist (or the id is malformed).
+export async function getListing(id: string): Promise<Listing | null> {
+  if (!UUID_RE.test(id)) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("listings")
+    .select(COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  return (data as Listing | null) ?? null;
+}
+
 export async function getCities(): Promise<string[]> {
   const supabase = await createClient();
   const { data } = await supabase.from("listings").select("city").limit(500);

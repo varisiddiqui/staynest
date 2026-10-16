@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HackCellence Stays
 
-## Getting Started
+A stay-booking web app: browse listings, book dates, and manage your trips.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router), React 19, Tailwind CSS 4, shadcn/ui, Supabase (Auth + Postgres).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
+- Email/password signup and login
+- Search and filter stays by keyword, city, price and guests
+- Listing detail page with date picker and live price estimate
+- Booking with double-booking protection enforced in the database
+- "My trips" dashboard with cancellation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run locally
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Create `.env.local` from the example and fill in your Supabase values:
+   ```bash
+   cp .env.example .env.local
+   ```
+3. In Supabase, open **SQL Editor** and run `supabase/schema.sql` (creates tables, security rules, booking functions and sample listings).
+4. Start the dev server and open http://localhost:3000:
+   ```bash
+   npm run dev
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project layout
+- `app/` pages and server actions
+- `components/` UI components
+- `lib/` Supabase clients and data helpers
+- `supabase/schema.sql` database schema
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `NOTES.md` for current status and next steps.

@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-
+import { io } from "next/cache";
 // Use in Server Components, Route Handlers and Server Actions.
 export async function createClient() {
+  await io();
   const cookieStore = await cookies();
 
   return createServerClient(
