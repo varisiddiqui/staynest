@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "HackCellence Stays",
-    template: "%s | HackCellence Stays",
+    default: "StayNest",
+    template: "%s | StayNest",
   },
   description: "Find a stay, book it, and manage your trips.",
 };

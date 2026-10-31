@@ -44,7 +44,7 @@ export function Navbar() {
     <header className="border-b">
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
         <Link href="/" className="font-semibold">
-          HackCellence Stays
+          StayNest
         </Link>
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <Link href="/listings" className={linkClass}>
